@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Gemini Sparkle (#D0BCFF) -->
+    <path
+        android:fillColor="#D0BCFF"
+        android:pathData="M 54 20 C 54 44 44 54 20 54 C 44 54 54 64 54 88 C 54 64 64 54 88 54 C 64 54 54 44 54 20 Z" />
+    <!-- Inner Terminal Bracket >_ (#B2F2BB) -->
+    <path
+        android:strokeColor="#1C1B1F"
+        android:strokeWidth="8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 44 46 L 50 54 L 44 62 M 54 64 L 64 64" />
+    <path
+        android:strokeColor="#B2F2BB"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 44 46 L 50 54 L 44 62 M 54 64 L 64 64" />
+</vector>
