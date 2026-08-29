@@ -77,18 +77,12 @@ object Routes {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(viewModel: AgentViewModel = viewModel(factory = AgentViewModel.Factory)) {
-    val isGenerating by viewModel.isGenerating.collectAsState()
-    val currentToolName by viewModel.currentToolName.collectAsState()
-
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        DynamicGlowingBackground(isGenerating, currentToolName)
-
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Routes.DASHBOARD
 
     Scaffold(
-        containerColor = Color.Transparent,
+        containerColor = Color(0xFF1C1B1F),
         bottomBar = {
             TelegramBottomBar(
                 currentRoute = currentRoute,
@@ -98,7 +92,7 @@ fun HomeScreen(viewModel: AgentViewModel = viewModel(factory = AgentViewModel.Fa
         topBar = {
             TopAppBar(
                 title = { Text("Nexus Agent AI", style = MaterialTheme.typography.titleMedium, color = Color.White) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF151419))
             )
         }
     ) { paddingValues ->
@@ -115,7 +109,6 @@ fun HomeScreen(viewModel: AgentViewModel = viewModel(factory = AgentViewModel.Fa
             composable(Routes.CONSOLE) { ConsoleView(viewModel) }
             composable(Routes.SETTINGS) { SettingsView(viewModel) }
         }
-    }
     }
 }
 
@@ -144,8 +137,8 @@ fun DashboardView(viewModel: AgentViewModel, navController: NavHostController) {
                 items(workspaces) { workspace ->
                     ElevatedCard(
                         onClick = { selectedWorkspace = workspace.second },
-                        colors = CardDefaults.elevatedCardColors(containerColor = Color.Transparent),
-                        modifier = Modifier.height(120.dp).fillMaxWidth().glassMorphism(16.dp)
+                        colors = CardDefaults.elevatedCardColors(containerColor = Color(0xFF2D2C31)),
+                        modifier = Modifier.height(120.dp).fillMaxWidth()
                     ) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(workspace.first, color = Color.White, style = MaterialTheme.typography.titleMedium)
@@ -184,8 +177,8 @@ fun DashboardView(viewModel: AgentViewModel, navController: NavHostController) {
                             viewModel.loadSession(session.id, session.sessionType)
                             navController.navigate(Routes.CHAT) { launchSingleTop = true }
                         },
-                        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                        modifier = Modifier.fillMaxWidth().height(64.dp).glassMorphism(16.dp)
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF2D2C31)),
+                        modifier = Modifier.fillMaxWidth().height(64.dp)
                     ) {
                         Box(modifier = Modifier.padding(16.dp), contentAlignment = Alignment.CenterStart) {
                             Text(session.title, color = Color.White)
@@ -227,7 +220,7 @@ fun GalleryView(viewModel: AgentViewModel) {
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(versions) { version ->
-                    Card(colors = CardDefaults.cardColors(containerColor = Color.Transparent), modifier = Modifier.fillMaxWidth().glassMorphism(12.dp)) {
+                    Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF2D2C31)), modifier = Modifier.fillMaxWidth()) {
                         Row(modifier = Modifier.padding(12.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                             Text(File(version.filePath).name, color = Color.LightGray, fontSize = 14.sp, modifier = Modifier.weight(1f))
                             when (targetAssetType) {
@@ -261,7 +254,7 @@ fun ConsoleView(viewModel: AgentViewModel) {
     Column(modifier = Modifier.fillMaxSize().padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 96.dp)) {
         Text("Console", style = MaterialTheme.typography.titleLarge, color = Color.White)
         Spacer(modifier = Modifier.height(16.dp))
-        Box(modifier = Modifier.fillMaxSize().glassMorphism(8.dp).padding(8.dp)) {
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black, RoundedCornerShape(8.dp)).padding(8.dp)) {
             SelectionContainer {
                 Text(logs, color = Color.Green, style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace))
             }
@@ -323,8 +316,11 @@ fun MessageBubble(message: com.example.data.ChatMessageEntity) {
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
         if (isTool) {
-            Box(
-                modifier = Modifier.widthIn(max = 320.dp).glassMorphism(16.dp)
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = Color(0xFF1E1D22),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF333333)),
+                modifier = Modifier.widthIn(max = 320.dp)
             ) {
                 androidx.compose.foundation.text.selection.SelectionContainer {
                     Text(
@@ -338,7 +334,7 @@ fun MessageBubble(message: com.example.data.ChatMessageEntity) {
         } else {
             Box(
                 modifier = Modifier
-                    .glassMorphism(24.dp)
+                    .background(if (isUser) Color(0xFF262626) else Color(0x40000000), RoundedCornerShape(24.dp))
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {
                 androidx.compose.foundation.text.selection.SelectionContainer {
@@ -367,79 +363,6 @@ fun androidx.compose.ui.Modifier.glassMorphism(
         ),
         shape = RoundedCornerShape(cornerRadius)
     )
-
-
-@Composable
-fun DynamicGlowingBackground(isGenerating: Boolean, currentToolName: String?) {
-    var stepCount by remember { mutableStateOf(0) }
-    
-    LaunchedEffect(currentToolName) {
-        if (currentToolName != null) {
-            stepCount++
-        }
-    }
-
-    val idleColor = Color(0xFF0D47A1)
-    
-    val thinkingColors = listOf(
-        Color(0xFF1B5E20), // Green
-        Color(0xFFB71C1C), // Red
-        Color(0xFF4A148C), // Purple
-        Color(0xFFE65100), // Orange
-        Color(0xFF006064)  // Teal
-    )
-    
-    val targetColor = if (isGenerating) {
-        if (currentToolName != null) {
-            thinkingColors[stepCount % thinkingColors.size]
-        } else {
-            Color(0xFF1565C0)
-        }
-    } else {
-        idleColor
-    }
-    
-    val animatedColor by animateColorAsState(
-        targetValue = targetColor,
-        animationSpec = tween(durationMillis = 1500, easing = LinearEasing),
-        label = "BgColor"
-    )
-
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val radiusMultiplier by infiniteTransition.animateFloat(
-        initialValue = 1.0f,
-        targetValue = 1.4f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "radius"
-    )
-    
-    val xOffset by infiniteTransition.animateFloat(
-        initialValue = 0.2f,
-        targetValue = 0.8f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(6000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "xOffset"
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .drawBehind {
-                drawRect(
-                    brush = Brush.radialGradient(
-                        colors = listOf(animatedColor.copy(alpha = 0.6f), Color.Transparent),
-                        center = Offset(size.width * xOffset, size.height * 0.3f),
-                        radius = size.width * radiusMultiplier
-                    )
-                )
-            }
-    )
-}
 
 @Composable
 fun GlowingBackground(glowColor: Color) {
@@ -470,7 +393,14 @@ fun ChatView(viewModel: AgentViewModel) {
     LaunchedEffect(isToolRunning) { if (isToolRunning) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove) }
     LaunchedEffect(isGenerating) { if (!isGenerating) haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    val animatedGlowColor by animateColorAsState(
+        targetValue = if (isGenerating) Color(0xFF1B5E20) else Color(0xFF0D47A1),
+        animationSpec = tween(durationMillis = 1000),
+        label = "GlowColorAnimation"
+    )
+
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        GlowingBackground(glowColor = animatedGlowColor)
         
         Column(modifier = Modifier.fillMaxSize()) {
             // Top Bar Replica
@@ -686,8 +616,10 @@ fun SettingsSection(title: String, content: @Composable () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(title, style = MaterialTheme.typography.titleMedium, color = Color(0xFFAAAAAA), fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(12.dp))
-        Box(
-            modifier = Modifier.fillMaxWidth().glassMorphism(16.dp)
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = Color(0xFF1E1D22),
+            modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 content()
